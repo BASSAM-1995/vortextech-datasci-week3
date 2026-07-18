@@ -393,8 +393,8 @@ if 'category_list' in filtered_df.columns:
                 f'border-radius:20px;border:1px solid {border_color};'
                 f'box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap;'
                 f'transition:all 0.2s ease;cursor:default;" '
-                f'onmouseover="this.style.transform="scale(1.08)";this.style.boxShadow="0 4px 16px rgba(0,0,0,0.25)"" '
-                f'onmouseout="this.style.transform="scale(1)";this.style.boxShadow="0 2px 8px rgba(0,0,0,0.15)"">'
+                f"onmouseover=\"this.style.transform=\'scale(1.08)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.25)\'\" "
+                f"onmouseout=\"this.style.transform=\'scale(1)\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.15)\'\">"
                 f'{tag} <small style="opacity:0.7;font-size:0.6em">({count:,})</small></span>'
             )
 
