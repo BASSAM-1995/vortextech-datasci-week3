@@ -188,19 +188,13 @@ if exclude_zero:
 countries = ['All'] + sorted(working_df['country_code'].dropna().unique().tolist())
 selected_country = st.sidebar.selectbox("🌍 Country", countries)
 
-# Status Filter (protected)
-if 'status' in working_df.columns:
-    statuses = ['All'] + sorted(working_df['status'].dropna().unique().tolist())
-    selected_status = st.sidebar.selectbox("📋 Status", statuses)
-else:
-    selected_status = 'All'
+# Status Filter
+statuses = ['All'] + sorted(working_df['status'].dropna().unique().tolist())
+selected_status = st.sidebar.selectbox("📋 Status", statuses)
 
-# Funding Level Filter (protected)
-if 'funding_level' in working_df.columns:
-    funding_levels = ['All'] + sorted(working_df['funding_level'].dropna().unique().tolist())
-    selected_funding_level = st.sidebar.selectbox("💎 Funding Level", funding_levels)
-else:
-    selected_funding_level = 'All'
+# Funding Level Filter
+funding_levels = ['All'] + sorted(working_df['funding_level'].dropna().unique().tolist())
+selected_funding_level = st.sidebar.selectbox("💎 Funding Level", funding_levels)
 
 # Founded Year Range
 if 'founded_year' in working_df.columns:
@@ -264,10 +258,10 @@ if search_query and 'name' in filtered_df.columns:
 if selected_country != 'All':
     filtered_df = filtered_df[filtered_df['country_code'] == selected_country]
 
-if selected_status != 'All' and 'status' in filtered_df.columns:
+if selected_status != 'All':
     filtered_df = filtered_df[filtered_df['status'] == selected_status]
 
-if selected_funding_level != 'All' and 'funding_level' in filtered_df.columns:
+if selected_funding_level != 'All':
     filtered_df = filtered_df[filtered_df['funding_level'] == selected_funding_level]
 
 if year_range is not None and 'founded_year' in filtered_df.columns:
@@ -282,6 +276,7 @@ filtered_df = filtered_df[
 ]
 
 st.sidebar.markdown(f"📊 **Results: {len(filtered_df):,}** companies")
+
 st.sidebar.caption("💡 Filter options are independent (not cascading) for better UX")
 
 # ======================
@@ -355,6 +350,8 @@ with colB:
         st.info("Category data not available")
 
 # ======================
+# 🏷️ Tag Cloud
+# ======================
 # 🏷️ Category Tag Cloud (Creative HTML Grid)
 # ======================
 st.subheader("🏷️ Category Tag Cloud")
@@ -393,8 +390,8 @@ if 'category_list' in filtered_df.columns:
                 f'border-radius:20px;border:1px solid {border_color};'
                 f'box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap;'
                 f'transition:all 0.2s ease;cursor:default;" '
-                f"onmouseover=\"this.style.transform=\'scale(1.08)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.25)\'\" "
-                f"onmouseout=\"this.style.transform=\'scale(1)\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.15)\'\">"
+                f'onmouseover="this.style.transform=&#39;scale(1.08)&#39;;this.style.boxShadow=&#39;0 4px 16px rgba(0,0,0,0.25)&#39;" '
+                f'onmouseout="this.style.transform=&#39;scale(1)&#39;;this.style.boxShadow=&#39;0 2px 8px rgba(0,0,0,0.15)&#39;">'
                 f'{tag} <small style="opacity:0.7;font-size:0.6em">({count:,})</small></span>'
             )
 
@@ -437,13 +434,15 @@ with colC:
     funding_for_hist = filtered_df[filtered_df['funding_total_usd'] > 0]['funding_total_usd']
 
     if len(funding_for_hist) > 0:
-        log_vals = np.log10(funding_for_hist.replace(0, 1))
+        # Manual log10 bins for stable display across all data ranges
+        log_vals = np.log10(funding_for_hist.replace(0, 1))  # avoid log(0)
         fig3 = px.histogram(
             x=log_vals,
             nbins=30,
             template=get_template(),
             color_discrete_sequence=['#667eea']
         )
+        # Custom tick labels showing dollar values
         tick_vals = list(range(int(np.floor(log_vals.min())), int(np.ceil(log_vals.max())) + 1))
         fig3.update_xaxes(
             tickvals=tick_vals,
@@ -607,6 +606,7 @@ else:
 # 📋 Data Table
 # ======================
 st.divider()
+
 st.subheader("📋 Data Preview")
 
 display_cols = ['name', 'country_code', 'primary_category', 'funding_total_usd', 'status', 'founded_year', 'funding_level']
@@ -665,6 +665,7 @@ st.download_button(
 # 🤖 Smart Insights
 # ======================
 st.divider()
+
 st.subheader("🤖 Smart Insights")
 
 insights = []
@@ -693,4 +694,5 @@ if len(filtered_df) > 0:
 # Footer
 # ======================
 st.divider()
+
 st.caption("🚀 VortexTech | Data Dashboard | Built with ❤️ using Streamlit + Plotly")
