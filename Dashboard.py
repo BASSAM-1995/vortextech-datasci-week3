@@ -76,6 +76,29 @@ css_dark = """
     }
     div[data-baseweb="popover"] * { color: #fafafa !important; }
     li[data-baseweb="menu-item"]:hover { background-color: #3a3d4a !important; }
+
+    /* Selectbox input fields (closed state) */
+    div[data-baseweb="select"] div, div[data-baseweb="select"] input,
+    div[data-baseweb="select"] span, div[data-testid="stSelectbox"] div {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border-color: #4a5568 !important;
+    }
+    div[data-baseweb="select"] svg { fill: #fafafa !important; }
+
+    /* Slider and number input fields */
+    div[data-testid="stSlider"] div, div[data-testid="stNumberInput"] div,
+    div[data-testid="stTextInput"] div, div[data-testid="stTextInput"] input {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border-color: #4a5568 !important;
+    }
+
+    /* Checkbox styling */
+    div[data-testid="stCheckbox"] label { color: #fafafa !important; }
+    div[data-testid="stCheckbox"] div[role="checkbox"] {
+        border-color: #667eea !important;
+    }
     /* Divider */
     hr { border-color: #4a5568 !important; }
     /* Info boxes */
