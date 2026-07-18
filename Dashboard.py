@@ -79,7 +79,7 @@ css_dark = """
         color: #fafafa !important;
     }
 
-    /* ===== SELECTBOX (CLOSED STATE) - Streamlit 1.28+ ===== */
+    /* ===== SELECTBOX (CLOSED STATE) ===== */
     div[data-testid="stSelectbox"] > div > div,
     div[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child,
     div[data-testid="stSelectbox"] input {
@@ -150,63 +150,89 @@ css_dark = """
         color: #fafafa !important;
         border: 1px solid #4a5568 !important;
     }
-</style>
 
-<script>
-// JavaScript to handle dynamic dropdown styling (React portals)
-(function() {
-    function styleDropdowns() {
-        // Target all dropdown menus (React portals outside .stApp)
-        var popovers = document.querySelectorAll('div[data-baseweb="popover"], div[data-baseweb="menu"]');
-        popovers.forEach(function(popover) {
-            popover.style.backgroundColor = '#262730';
-            popover.style.color = '#fafafa';
-            popover.style.border = '1px solid #4a5568';
-            popover.style.boxShadow = '0 4px 16px rgba(0,0,0,0.5)';
-
-            // Style all children
-            var children = popover.querySelectorAll('*');
-            children.forEach(function(child) {
-                if (child.tagName !== 'INPUT') {
-                    child.style.backgroundColor = 'transparent';
-                }
-                child.style.color = '#fafafa';
-            });
-
-            // Style options
-            var options = popover.querySelectorAll('[role="option"], li');
-            options.forEach(function(option) {
-                option.style.backgroundColor = '#262730';
-                option.style.borderBottom = '1px solid #3a3d4a';
-                option.onmouseover = function() {
-                    this.style.backgroundColor = '#3a3d4a';
-                };
-                option.onmouseout = function() {
-                    if (!this.getAttribute('aria-selected')) {
-                        this.style.backgroundColor = '#262730';
-                    }
-                };
-                if (option.getAttribute('aria-selected') === 'true') {
-                    option.style.backgroundColor = '#667eea';
-                }
-            });
-
-            // Style search input inside dropdown
-            var inputs = popover.querySelectorAll('input');
-            inputs.forEach(function(input) {
-                input.style.backgroundColor = '#1a1a2e';
-                input.style.color = '#fafafa';
-                input.style.border = '1px solid #4a5568';
-            });
-        });
+    /* ===== PORTAL / DROPDOWN MENU (OUTSIDE .stApp) ===== */
+    /* These are created by React portals at body level */
+    body > div[data-baseweb="popover"],
+    body > div[data-baseweb="menu"],
+    body > div > div[data-baseweb="popover"],
+    body > div > div[data-baseweb="menu"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
     }
 
-    // Run immediately and on mutations
-    styleDropdowns();
-    var observer = new MutationObserver(styleDropdowns);
-    observer.observe(document.body, { childList: true, subtree: true });
-})();
-</script>
+    /* All children of portal dropdowns */
+    body > div[data-baseweb="popover"] *,
+    body > div[data-baseweb="menu"] *,
+    body > div > div[data-baseweb="popover"] *,
+    body > div > div[data-baseweb="menu"] * {
+        background-color: transparent !important;
+        color: #fafafa !important;
+    }
+
+    /* Listbox container */
+    body > div[data-baseweb="popover"] div[role="listbox"],
+    body > div[data-baseweb="popover"] ul,
+    body > div > div[data-baseweb="popover"] div[role="listbox"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+    }
+
+    /* Individual options */
+    body > div[data-baseweb="popover"] div[role="option"],
+    body > div[data-baseweb="popover"] li,
+    body > div[data-baseweb="menu"] li,
+    body > div > div[data-baseweb="popover"] div[role="option"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border-bottom: 1px solid #3a3d4a !important;
+    }
+
+    /* Hover state for options */
+    body > div[data-baseweb="popover"] div[role="option"]:hover,
+    body > div[data-baseweb="popover"] li:hover,
+    body > div[data-baseweb="menu"] li:hover,
+    body > div > div[data-baseweb="popover"] div[role="option"]:hover {
+        background-color: #3a3d4a !important;
+        color: #ffffff !important;
+    }
+
+    /* Selected option */
+    body > div[data-baseweb="popover"] div[aria-selected="true"],
+    body > div > div[data-baseweb="popover"] div[aria-selected="true"] {
+        background-color: #667eea !important;
+        color: #ffffff !important;
+    }
+
+    /* Search input inside dropdown */
+    body > div[data-baseweb="popover"] input,
+    body > div > div[data-baseweb="popover"] input {
+        background-color: #1a1a2e !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
+    }
+
+    /* SVG icons in dropdown */
+    body > div[data-baseweb="popover"] svg,
+    body > div[data-baseweb="menu"] svg {
+        fill: #fafafa !important;
+        color: #fafafa !important;
+    }
+
+    /* Scrollbar in dropdown */
+    body > div[data-baseweb="popover"] ::-webkit-scrollbar,
+    body > div[data-baseweb="menu"] ::-webkit-scrollbar {
+        width: 8px !important;
+        background-color: #262730 !important;
+    }
+    body > div[data-baseweb="popover"] ::-webkit-scrollbar-thumb,
+    body > div[data-baseweb="menu"] ::-webkit-scrollbar-thumb {
+        background-color: #4a5568 !important;
+        border-radius: 4px !important;
+    }
+</style>
 """
 
 st.markdown(css_dark if dark_mode else css_light, unsafe_allow_html=True)
