@@ -35,88 +35,136 @@ css_light = """
 
 css_dark = """
 <style>
-    /* Global dark background */
+    /* ===== GLOBAL DARK BACKGROUND ===== */
     .stApp, .main, .block-container, [data-testid="stAppViewContainer"] {
         background-color: #0e1117 !important;
         color: #fafafa !important;
     }
-    /* All text elements */
+
+    /* ===== ALL TEXT ELEMENTS ===== */
     h1, h2, h3, h4, h5, h6, p, span, div, label, section, article, header, footer {
         color: #fafafa !important;
     }
-    /* Streamlit specific text elements */
+
+    /* Streamlit specific text */
     [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] span,
     [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] span {
         color: #fafafa !important;
     }
-    /* Subheaders (st.subheader) */
+
+    /* Subheaders */
     [data-testid="stSubheader"] h3, [data-testid="stSubheader"] div {
         color: #fafafa !important;
     }
-    /* Cards */
+
+    /* ===== CARDS & METRICS ===== */
     .card { padding: 20px; border-radius: 10px; background-color: #262730; box-shadow: 0px 2px 6px rgba(0,0,0,0.3); }
-    /* Metrics */
     [data-testid="stMetric"] { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 10px; border: 1px solid #667eea; }
     [data-testid="stMetricLabel"] { color: #a0a0a0 !important; }
     [data-testid="stMetricValue"] { color: #667eea !important; font-size: 24px !important; }
     [data-testid="stMetricDelta"] { color: #2ecc71 !important; }
-    /* DataFrame */
+
+    /* ===== DATA TABLE ===== */
     .stDataFrame { background-color: #262730 !important; }
-    /* Sidebar */
+
+    /* ===== SIDEBAR ===== */
     [data-testid="stSidebar"] { background-color: #1a1a2e !important; }
     [data-testid="stSidebar"] * { color: #fafafa !important; }
-    /* Form elements */
+    [data-testid="stSidebar"] p { color: #fafafa !important; }
+    [data-testid="stSidebar"] span { color: #fafafa !important; }
+    [data-testid="stSidebar"] label { color: #fafafa !important; }
+
+    /* ===== FORM LABELS ===== */
     .stSelectbox label, .stSlider label, .stTextInput label, .stCheckbox label {
         color: #fafafa !important;
     }
-    /* Dropdown/Popover fix - OPENED dropdown menu */
-    div[data-baseweb="popover"], 
-    div[data-baseweb="popover"] > div,
-    div[data-baseweb="popover"] [role="listbox"],
-    div[data-baseweb="popover"] [role="option"],
-    ul[data-baseweb="menu"], 
+
+    /* ===== POPOVER / DROPDOWN MENU (OPENED) ===== */
+    div[data-baseweb="popover"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+    }
+    div[data-baseweb="popover"] * {
+        background-color: transparent !important;
+        color: #fafafa !important;
+    }
+    div[data-baseweb="popover"] div[role="listbox"],
+    div[data-baseweb="popover"] ul {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+    }
+    div[data-baseweb="popover"] div[role="option"],
+    div[data-baseweb="popover"] li,
+    ul[data-baseweb="menu"] li,
     li[data-baseweb="menu-item"] {
         background-color: #262730 !important;
         color: #fafafa !important;
+        border-bottom: 1px solid #3a3d4a !important;
     }
-    div[data-baseweb="popover"] * { 
-        background-color: #262730 !important; 
-        color: #fafafa !important; 
+    div[data-baseweb="popover"] div[role="option"]:hover,
+    div[data-baseweb="popover"] div[role="option"][aria-selected="true"],
+    div[data-baseweb="popover"] li:hover,
+    li[data-baseweb="menu-item"]:hover {
+        background-color: #3a3d4a !important;
+        color: #ffffff !important;
     }
-    div[data-baseweb="popover"] [role="option"]:hover,
-    div[data-baseweb="popover"] [aria-selected="true"],
-    li[data-baseweb="menu-item"]:hover { 
-        background-color: #3a3d4a !important; 
+    div[data-baseweb="popover"] div[aria-selected="true"] {
+        background-color: #667eea !important;
+        color: #ffffff !important;
     }
-    /* Dropdown arrow icon */
-    div[data-baseweb="select"] svg[data-testid="icon"] { 
-        fill: #fafafa !important; 
+    div[data-baseweb="popover"] input {
+        background-color: #1a1a2e !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
     }
 
-    /* Selectbox input fields (closed state) */
-    div[data-baseweb="select"] div, div[data-baseweb="select"] input,
-    div[data-baseweb="select"] span, div[data-testid="stSelectbox"] div {
+    /* ===== SELECTBOX (CLOSED STATE) ===== */
+    div[data-baseweb="select"] {
+        background-color: #262730 !important;
+    }
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] div[role="button"],
+    div[data-baseweb="select"] input {
         background-color: #262730 !important;
         color: #fafafa !important;
         border-color: #4a5568 !important;
     }
-    div[data-baseweb="select"] svg { fill: #fafafa !important; }
+    div[data-baseweb="select"] span {
+        color: #fafafa !important;
+    }
+    div[data-baseweb="select"] svg,
+    div[data-baseweb="select"] svg[data-testid="icon"] {
+        fill: #fafafa !important;
+        color: #fafafa !important;
+    }
 
-    /* Slider and number input fields */
-    div[data-testid="stSlider"] div, div[data-testid="stNumberInput"] div,
-    div[data-testid="stTextInput"] div, div[data-testid="stTextInput"] input {
+    /* ===== SLIDER & INPUTS ===== */
+    div[data-testid="stSlider"] div,
+    div[data-testid="stSlider"] div[role="slider"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+    }
+    div[data-testid="stNumberInput"] div,
+    div[data-testid="stTextInput"] div,
+    div[data-testid="stTextInput"] input {
         background-color: #262730 !important;
         color: #fafafa !important;
         border-color: #4a5568 !important;
     }
 
-    /* Checkbox styling */
+    /* ===== CHECKBOX ===== */
     div[data-testid="stCheckbox"] label { color: #fafafa !important; }
     div[data-testid="stCheckbox"] div[role="checkbox"] {
         border-color: #667eea !important;
+        background-color: #262730 !important;
+    }
+    div[data-testid="stCheckbox"] div[role="checkbox"][aria-checked="true"] {
+        background-color: #667eea !important;
     }
 
-    /* Button styling for dark mode */
+    /* ===== BUTTONS ===== */
     div[data-testid="stButton"] button {
         background-color: #667eea !important;
         color: #ffffff !important;
@@ -126,18 +174,27 @@ css_dark = """
         background-color: #764ba2 !important;
         border-color: #667eea !important;
     }
-
-    /* Refresh button specific */
     button[kind="secondary"] {
         background-color: #2d3748 !important;
         color: #fafafa !important;
         border: 1px solid #4a5568 !important;
     }
-    /* Divider */
+    button[kind="secondary"]:hover {
+        background-color: #4a5568 !important;
+    }
+
+    /* ===== DIVIDER & ALERTS ===== */
     hr { border-color: #4a5568 !important; }
-    /* Info boxes */
-    .stAlert { background-color: #1a365d !important; color: #fafafa !important; }
+    .stAlert { background-color: #1a365d !important; color: #fafafa !important; border-left-color: #3182ce !important; }
     .stAlert p { color: #fafafa !important; }
+
+    /* ===== TOOLTIP ===== */
+    div[data-testid="stTooltipIcon"] { color: #a0a0a0 !important; }
+    div[data-testid="stTooltipContent"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
+    }
 </style>
 """
 
