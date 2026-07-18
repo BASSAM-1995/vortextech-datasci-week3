@@ -38,22 +38,21 @@ css_dark = """
     /* ===== GLOBAL DARK BACKGROUND ===== */
     .stApp, .main, .block-container, [data-testid="stAppViewContainer"] {
         background-color: #0e1117 !important;
+    }
+
+    /* ===== TEXT FIX - بدون ما نكسر dropdown ===== */
+    /* نلون بس النصوص اللي Streamlit مش بيتحكم فيها مباشرة */
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] span,
+    [data-testid="stCaptionContainer"] p,
+    [data-testid="stCaptionContainer"] span,
+    [data-testid="stSubheader"] h3,
+    [data-testid="stSubheader"] div {
         color: #fafafa !important;
     }
 
-    /* ===== ALL TEXT ELEMENTS ===== */
-    h1, h2, h3, h4, h5, h6, p, span, div, label, section, article, header, footer {
-        color: #fafafa !important;
-    }
-
-    /* Streamlit specific text */
-    [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] span,
-    [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] span {
-        color: #fafafa !important;
-    }
-
-    /* Subheaders */
-    [data-testid="stSubheader"] h3, [data-testid="stSubheader"] div {
+    /* العناوين الرئيسية */
+    h1, h2, h3, h4, h5, h6 {
         color: #fafafa !important;
     }
 
@@ -69,10 +68,9 @@ css_dark = """
 
     /* ===== SIDEBAR ===== */
     [data-testid="stSidebar"] { background-color: #1a1a2e !important; }
-    [data-testid="stSidebar"] * { color: #fafafa !important; }
-    [data-testid="stSidebar"] p { color: #fafafa !important; }
-    [data-testid="stSidebar"] span { color: #fafafa !important; }
-    [data-testid="stSidebar"] label { color: #fafafa !important; }
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #fafafa !important;
+    }
 
     /* ===== FORM LABELS ===== */
     .stSelectbox label, .stSlider label, .stTextInput label, .stCheckbox label {
@@ -151,84 +149,57 @@ css_dark = """
         border: 1px solid #4a5568 !important;
     }
 
-    /* ===== PORTAL / DROPDOWN MENU (OUTSIDE .stApp) ===== */
-    /* These are created by React portals at body level */
+    /* ===== FIX DROPDOWN BACKGROUND + TEXT (Portal) ===== */
     body > div[data-baseweb="popover"],
-    body > div[data-baseweb="menu"],
-    body > div > div[data-baseweb="popover"],
-    body > div > div[data-baseweb="menu"] {
+    body > div[data-baseweb="menu"] {
         background-color: #262730 !important;
-        color: #fafafa !important;
-        border: 1px solid #4a5568 !important;
         box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
     }
 
-    /* All children of portal dropdowns */
-    body > div[data-baseweb="popover"] *,
-    body > div[data-baseweb="menu"] *,
-    body > div > div[data-baseweb="popover"] *,
-    body > div > div[data-baseweb="menu"] * {
-        background-color: transparent !important;
-        color: #fafafa !important;
-    }
-
-    /* Listbox container */
-    body > div[data-baseweb="popover"] div[role="listbox"],
-    body > div[data-baseweb="popover"] ul,
-    body > div > div[data-baseweb="popover"] div[role="listbox"] {
-        background-color: #262730 !important;
-        color: #fafafa !important;
-    }
-
-    /* Individual options */
-    body > div[data-baseweb="popover"] div[role="option"],
-    body > div[data-baseweb="popover"] li,
-    body > div[data-baseweb="menu"] li,
-    body > div > div[data-baseweb="popover"] div[role="option"] {
-        background-color: #262730 !important;
-        color: #fafafa !important;
-        border-bottom: 1px solid #3a3d4a !important;
-    }
-
-    /* Hover state for options */
-    body > div[data-baseweb="popover"] div[role="option"]:hover,
-    body > div[data-baseweb="popover"] li:hover,
-    body > div[data-baseweb="menu"] li:hover,
-    body > div > div[data-baseweb="popover"] div[role="option"]:hover {
-        background-color: #3a3d4a !important;
+    /* نخلي النص في الـ dropdown أبيض بس الخلفية داكنة */
+    body > div[data-baseweb="popover"] div,
+    body > div[data-baseweb="menu"] div {
         color: #ffffff !important;
     }
 
-    /* Selected option */
-    body > div[data-baseweb="popover"] div[aria-selected="true"],
-    body > div > div[data-baseweb="popover"] div[aria-selected="true"] {
+    /* الخيارات */
+    body > div[data-baseweb="popover"] div[role="option"],
+    body > div[data-baseweb="popover"] li {
+        background-color: #262730 !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid #3a3d4a !important;
+    }
+
+    /* hover */
+    body > div[data-baseweb="popover"] div[role="option"]:hover,
+    body > div[data-baseweb="popover"] li:hover {
+        background-color: #3a3d4a !important;
+    }
+
+    /* selected */
+    body > div[data-baseweb="popover"] div[aria-selected="true"] {
         background-color: #667eea !important;
         color: #ffffff !important;
     }
 
-    /* Search input inside dropdown */
-    body > div[data-baseweb="popover"] input,
-    body > div > div[data-baseweb="popover"] input {
+    /* search input */
+    body > div[data-baseweb="popover"] input {
         background-color: #1a1a2e !important;
-        color: #fafafa !important;
+        color: #ffffff !important;
         border: 1px solid #4a5568 !important;
     }
 
-    /* SVG icons in dropdown */
-    body > div[data-baseweb="popover"] svg,
-    body > div[data-baseweb="menu"] svg {
-        fill: #fafafa !important;
-        color: #fafafa !important;
+    /* SVG icons */
+    body > div[data-baseweb="popover"] svg {
+        fill: #ffffff !important;
     }
 
-    /* Scrollbar in dropdown */
-    body > div[data-baseweb="popover"] ::-webkit-scrollbar,
-    body > div[data-baseweb="menu"] ::-webkit-scrollbar {
+    /* scrollbar */
+    body > div[data-baseweb="popover"] ::-webkit-scrollbar {
         width: 8px !important;
         background-color: #262730 !important;
     }
-    body > div[data-baseweb="popover"] ::-webkit-scrollbar-thumb,
-    body > div[data-baseweb="menu"] ::-webkit-scrollbar-thumb {
+    body > div[data-baseweb="popover"] ::-webkit-scrollbar-thumb {
         background-color: #4a5568 !important;
         border-radius: 4px !important;
     }
