@@ -35,22 +35,52 @@ css_light = """
 
 css_dark = """
 <style>
-    .main { background-color: #0e1117; color: #fafafa; }
+    /* Global dark background */
+    .stApp, .main, .block-container, [data-testid="stAppViewContainer"] {
+        background-color: #0e1117 !important;
+        color: #fafafa !important;
+    }
+    /* All text elements */
+    h1, h2, h3, h4, h5, h6, p, span, div, label, section, article, header, footer {
+        color: #fafafa !important;
+    }
+    /* Streamlit specific text elements */
+    [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] span,
+    [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] span {
+        color: #fafafa !important;
+    }
+    /* Subheaders (st.subheader) */
+    [data-testid="stSubheader"] h3, [data-testid="stSubheader"] div {
+        color: #fafafa !important;
+    }
+    /* Cards */
     .card { padding: 20px; border-radius: 10px; background-color: #262730; box-shadow: 0px 2px 6px rgba(0,0,0,0.3); }
-    h1, h2, h3, h4, h5, h6, p, label { color: #fafafa !important; }
+    /* Metrics */
     [data-testid="stMetric"] { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 10px; border: 1px solid #667eea; }
     [data-testid="stMetricLabel"] { color: #a0a0a0 !important; }
     [data-testid="stMetricValue"] { color: #667eea !important; font-size: 24px !important; }
     [data-testid="stMetricDelta"] { color: #2ecc71 !important; }
+    /* DataFrame */
     .stDataFrame { background-color: #262730 !important; }
-    .stSelectbox label, .stSlider label, .stTextInput label { color: #fafafa !important; }
-    /* Fix: Dark mode dropdown/popover styling */
+    /* Sidebar */
+    [data-testid="stSidebar"] { background-color: #1a1a2e !important; }
+    [data-testid="stSidebar"] * { color: #fafafa !important; }
+    /* Form elements */
+    .stSelectbox label, .stSlider label, .stTextInput label, .stCheckbox label {
+        color: #fafafa !important;
+    }
+    /* Dropdown/Popover fix */
     div[data-baseweb="popover"], ul[data-baseweb="menu"], li[data-baseweb="menu-item"] {
         background-color: #262730 !important;
         color: #fafafa !important;
     }
     div[data-baseweb="popover"] * { color: #fafafa !important; }
     li[data-baseweb="menu-item"]:hover { background-color: #3a3d4a !important; }
+    /* Divider */
+    hr { border-color: #4a5568 !important; }
+    /* Info boxes */
+    .stAlert { background-color: #1a365d !important; color: #fafafa !important; }
+    .stAlert p { color: #fafafa !important; }
 </style>
 """
 
@@ -176,8 +206,7 @@ exclude_unknown = st.sidebar.checkbox(
     "❓ Exclude 'Unknown' categories",
     value=False,
     help=(f"{unknown_count:,} companies have 'Unknown' as their category. "
-          "This only affects the category charts below (Pie & Tag Cloud) — "
-          "it does not remove companies from KPIs, the table, or other charts.")
+          "When enabled, these companies are excluded from ALL charts, KPIs, and the data table.")
 )
 
 working_df = df.copy()
@@ -275,6 +304,10 @@ filtered_df = filtered_df[
     (filtered_df['funding_total_usd'] <= funding_range[1])
 ]
 
+# Apply exclude_unknown to ALL data (not just category charts)
+if exclude_unknown and 'primary_category' in filtered_df.columns:
+    filtered_df = filtered_df[filtered_df['primary_category'] != 'Unknown']
+
 st.sidebar.markdown(f"📊 **Results: {len(filtered_df):,}** companies")
 
 st.sidebar.caption("💡 Filter options are independent (not cascading) for better UX")
@@ -316,12 +349,14 @@ with colA:
     if 'country_code' in filtered_df.columns:
         top_countries = safe_value_counts(filtered_df['country_code'], top_n=10, name_col='Country', count_col='Count')
 
+        # Dynamic color scale: stronger contrast in light mode
+        country_colors = 'Viridis' if not dark_mode else 'Blues'
         fig1 = px.bar(
             top_countries,
             x='Country',
             y='Count',
             color='Count',
-            color_continuous_scale='Blues',
+            color_continuous_scale=country_colors,
             template=get_template()
         )
         fig1.update_layout(height=400)
@@ -406,9 +441,11 @@ if 'category_list' in filtered_df.columns:
         # Bar chart below
         st.markdown("<br>", unsafe_allow_html=True)
         tag_bar = tag_counts.head(10).rename_axis('Category').reset_index(name='Count')
+        # Dynamic color scale for tag bar chart
+        tag_colors = 'Viridis' if not dark_mode else 'Blues'
         fig_tags_bar = px.bar(
             tag_bar, x='Count', y='Category', orientation='h',
-            color='Count', color_continuous_scale='Blues',
+            color='Count', color_continuous_scale=tag_colors,
             template=get_template(), height=300
         )
         fig_tags_bar.update_layout(
@@ -436,11 +473,13 @@ with colC:
     if len(funding_for_hist) > 0:
         # Manual log10 bins for stable display across all data ranges
         log_vals = np.log10(funding_for_hist.replace(0, 1))  # avoid log(0)
+        # Dynamic color based on mode
+        hist_color = '#4f46e5' if not dark_mode else '#667eea'
         fig3 = px.histogram(
             x=log_vals,
             nbins=30,
             template=get_template(),
-            color_discrete_sequence=['#667eea']
+            color_discrete_sequence=[hist_color]
         )
         # Custom tick labels showing dollar values
         tick_vals = list(range(int(np.floor(log_vals.min())), int(np.ceil(log_vals.max())) + 1))
@@ -462,13 +501,15 @@ with colD:
     if 'name' in filtered_df.columns:
         top_companies = filtered_df.nlargest(10, 'funding_total_usd')[['name', 'funding_total_usd', 'country_code']]
 
+        # Dynamic color scale
+        company_colors = 'Viridis' if not dark_mode else 'Blues'
         fig4 = px.bar(
             top_companies,
             x='funding_total_usd',
             y='name',
             orientation='h',
             color='funding_total_usd',
-            color_continuous_scale='Blues',
+            color_continuous_scale=company_colors,
             template=get_template()
         )
         fig4.update_layout(
@@ -544,12 +585,14 @@ if 'founded_year' in filtered_df.columns:
         with colTime1:
             st.markdown("**💰 Total Funding by Year**")
             yearly_funding = year_df.groupby('founded_year')['funding_total_usd'].sum().reset_index()
+            # Dynamic color for temporal chart
+            time_color = '#4f46e5' if not dark_mode else '#667eea'
             fig_time = px.area(
                 yearly_funding,
                 x='founded_year',
                 y='funding_total_usd',
                 template=get_template(),
-                color_discrete_sequence=['#667eea']
+                color_discrete_sequence=[time_color]
             )
             fig_time.update_layout(height=350, xaxis_title="Year Founded", yaxis_title="Total Funding (USD)")
             st.plotly_chart(fig_time, use_container_width=True)
@@ -557,12 +600,14 @@ if 'founded_year' in filtered_df.columns:
         with colTime2:
             st.markdown("**🏢 Companies Founded by Year**")
             yearly_count = year_df.groupby('founded_year').size().reset_index(name='count')
+            # Dynamic color for count chart
+            count_color = '#7c3aed' if not dark_mode else '#764ba2'
             fig_count = px.bar(
                 yearly_count,
                 x='founded_year',
                 y='count',
                 template=get_template(),
-                color_discrete_sequence=['#764ba2']
+                color_discrete_sequence=[count_color]
             )
             fig_count.update_layout(height=350, xaxis_title="Year Founded", yaxis_title="Number of Companies")
             st.plotly_chart(fig_count, use_container_width=True)
@@ -587,13 +632,15 @@ if 'country_code' in filtered_df.columns:
     )
     country_map.columns = ['country_code', 'funding_total_usd', 'company_count']
 
+    # Dynamic color scale for map
+    map_colors = 'Viridis' if not dark_mode else 'Blues'
     fig_map = px.choropleth(
         country_map,
         locations='country_code',
         color='funding_total_usd',
         hover_name='country_code',
         hover_data={'company_count': True, 'funding_total_usd': ':,.0f'},
-        color_continuous_scale='Blues',
+        color_continuous_scale=map_colors,
         locationmode='ISO-3',
         template=get_template()
     )
