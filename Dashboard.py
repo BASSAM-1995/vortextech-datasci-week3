@@ -349,52 +349,75 @@ with colB:
         st.info("Category data not available")
 
 # ======================
-# 🏷️ Tag Cloud
+# 🏷️ Category Tag Cloud (Creative HTML Grid)
 # ======================
 st.subheader("🏷️ Category Tag Cloud")
 
 if 'category_list' in filtered_df.columns:
     all_tags = get_clean_categories(filtered_df['category_list'], exclude_unknown)
-    tag_counts = all_tags.value_counts().head(15)  # Top 15 only to avoid overcrowding
+    tag_counts = all_tags.value_counts().head(20)
 
     if len(tag_counts) > 0:
-        n = len(tag_counts)
-        x_pos = list(range(n))
-        y_pos = [1 if i % 2 == 0 else 2 for i in range(n)]  # Staggered 2-row layout
+        max_count = tag_counts.max()
+        min_count = tag_counts.min()
 
-        # Dynamic text/marker colors based on dark mode
-        tag_text_color = '#1a1a2e' if not dark_mode else 'white'
-        tag_line_color = '#1a1a2e' if not dark_mode else 'white'
+        if dark_mode:
+            bg_colors = ['#1e3a5f', '#2c5282', '#3182ce', '#4299e1', '#63b3ed']
+            text_color = '#ffffff'
+            border_color = '#4a5568'
+            container_bg = '#0e1117'
+        else:
+            bg_colors = ['#1a365d', '#2c5282', '#2b6cb0', '#3182ce', '#4299e1']
+            text_color = '#ffffff'
+            border_color = '#e2e8f0'
+            container_bg = '#f8f9fa'
 
-        fig_tags = px.scatter(
-            x=x_pos,
-            y=y_pos,
-            size=tag_counts.values,
-            text=tag_counts.index,
-            color=tag_counts.values,
-            color_continuous_scale='Cividis',   # strong contrast in both light/dark modes
-            template=get_template(),
-            size_max=70
+        tags_html = []
+        for i, (tag, count) in enumerate(tag_counts.items()):
+            if max_count != min_count:
+                size = 14 + (count - min_count) / (max_count - min_count) * 18
+            else:
+                size = 20
+            color_idx = i % len(bg_colors)
+            bg = bg_colors[color_idx]
+
+            tags_html.append(
+                f'<span style="display:inline-block;background:{bg};color:{text_color};'
+                f'font-size:{size:.0f}px;font-weight:600;padding:8px 16px;margin:6px;'
+                f'border-radius:20px;border:1px solid {border_color};'
+                f'box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap;'
+                f'transition:all 0.2s ease;cursor:default;" '
+                f'onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.25)'" '
+                f'onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'">'
+                f'{tag} <small style="opacity:0.7;font-size:0.6em">({count:,})</small></span>'
+            )
+
+        cloud_html = (
+            f'<div style="text-align:center;padding:20px;line-height:1.6;'
+            f'background:{container_bg};border-radius:12px;border:1px solid {border_color}">'
+            f'{"".join(tags_html)}</div>'
         )
-        fig_tags.update_traces(
-            textposition='middle center',
-            textfont=dict(size=11, color=tag_text_color, family='Arial Black'),
-            marker=dict(line=dict(width=1.5, color=tag_line_color), opacity=0.92)
+
+        st.markdown(cloud_html, unsafe_allow_html=True)
+
+        # Bar chart below
+        st.markdown("<br>", unsafe_allow_html=True)
+        tag_bar = tag_counts.head(10).rename_axis('Category').reset_index(name='Count')
+        fig_tags_bar = px.bar(
+            tag_bar, x='Count', y='Category', orientation='h',
+            color='Count', color_continuous_scale='Blues',
+            template=get_template(), height=300
         )
-        fig_tags.update_layout(
-            height=380,
-            xaxis=dict(showgrid=False, showticklabels=False, zeroline=False, range=[-0.5, n-0.5]),
-            yaxis=dict(showgrid=False, showticklabels=False, zeroline=False, range=[0.2, 2.8]),
-            showlegend=False,
-            margin=dict(l=20, r=20, t=30, b=20)
+        fig_tags_bar.update_layout(
+            yaxis={'categoryorder': 'total ascending'},
+            xaxis_title="Number of Companies", yaxis_title="",
+            showlegend=False, margin=dict(l=20, r=20, t=10, b=10)
         )
-        st.plotly_chart(fig_tags, use_container_width=True)
+        st.plotly_chart(fig_tags_bar, use_container_width=True)
     else:
         st.info("No category tags to display")
 else:
-    st.info("Category data not available")
-
-st.divider()
+    st.info("Category data not available")st.divider()
 
 # ======================
 # 📈 Charts Row 2
