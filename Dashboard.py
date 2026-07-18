@@ -79,65 +79,20 @@ css_dark = """
         color: #fafafa !important;
     }
 
-    /* ===== POPOVER / DROPDOWN MENU (OPENED) ===== */
-    div[data-baseweb="popover"] {
-        background-color: #262730 !important;
-        color: #fafafa !important;
-        border: 1px solid #4a5568 !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
-    }
-    div[data-baseweb="popover"] * {
-        background-color: transparent !important;
-        color: #fafafa !important;
-    }
-    div[data-baseweb="popover"] div[role="listbox"],
-    div[data-baseweb="popover"] ul {
-        background-color: #262730 !important;
-        color: #fafafa !important;
-    }
-    div[data-baseweb="popover"] div[role="option"],
-    div[data-baseweb="popover"] li,
-    ul[data-baseweb="menu"] li,
-    li[data-baseweb="menu-item"] {
-        background-color: #262730 !important;
-        color: #fafafa !important;
-        border-bottom: 1px solid #3a3d4a !important;
-    }
-    div[data-baseweb="popover"] div[role="option"]:hover,
-    div[data-baseweb="popover"] div[role="option"][aria-selected="true"],
-    div[data-baseweb="popover"] li:hover,
-    li[data-baseweb="menu-item"]:hover {
-        background-color: #3a3d4a !important;
-        color: #ffffff !important;
-    }
-    div[data-baseweb="popover"] div[aria-selected="true"] {
-        background-color: #667eea !important;
-        color: #ffffff !important;
-    }
-    div[data-baseweb="popover"] input {
-        background-color: #1a1a2e !important;
-        color: #fafafa !important;
-        border: 1px solid #4a5568 !important;
-    }
-
-    /* ===== SELECTBOX (CLOSED STATE) ===== */
-    div[data-baseweb="select"] {
-        background-color: #262730 !important;
-    }
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] div[role="button"],
-    div[data-baseweb="select"] input {
+    /* ===== SELECTBOX (CLOSED STATE) - Streamlit 1.28+ ===== */
+    div[data-testid="stSelectbox"] > div > div,
+    div[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child,
+    div[data-testid="stSelectbox"] input {
         background-color: #262730 !important;
         color: #fafafa !important;
         border-color: #4a5568 !important;
     }
-    div[data-baseweb="select"] span {
+    div[data-testid="stSelectbox"] [data-baseweb="select"] div[role="button"] {
+        background-color: #262730 !important;
         color: #fafafa !important;
     }
-    div[data-baseweb="select"] svg,
-    div[data-baseweb="select"] svg[data-testid="icon"] {
+    div[data-testid="stSelectbox"] svg {
         fill: #fafafa !important;
-        color: #fafafa !important;
     }
 
     /* ===== SLIDER & INPUTS ===== */
@@ -196,6 +151,62 @@ css_dark = """
         border: 1px solid #4a5568 !important;
     }
 </style>
+
+<script>
+// JavaScript to handle dynamic dropdown styling (React portals)
+(function() {
+    function styleDropdowns() {
+        // Target all dropdown menus (React portals outside .stApp)
+        var popovers = document.querySelectorAll('div[data-baseweb="popover"], div[data-baseweb="menu"]');
+        popovers.forEach(function(popover) {
+            popover.style.backgroundColor = '#262730';
+            popover.style.color = '#fafafa';
+            popover.style.border = '1px solid #4a5568';
+            popover.style.boxShadow = '0 4px 16px rgba(0,0,0,0.5)';
+
+            // Style all children
+            var children = popover.querySelectorAll('*');
+            children.forEach(function(child) {
+                if (child.tagName !== 'INPUT') {
+                    child.style.backgroundColor = 'transparent';
+                }
+                child.style.color = '#fafafa';
+            });
+
+            // Style options
+            var options = popover.querySelectorAll('[role="option"], li');
+            options.forEach(function(option) {
+                option.style.backgroundColor = '#262730';
+                option.style.borderBottom = '1px solid #3a3d4a';
+                option.onmouseover = function() {
+                    this.style.backgroundColor = '#3a3d4a';
+                };
+                option.onmouseout = function() {
+                    if (!this.getAttribute('aria-selected')) {
+                        this.style.backgroundColor = '#262730';
+                    }
+                };
+                if (option.getAttribute('aria-selected') === 'true') {
+                    option.style.backgroundColor = '#667eea';
+                }
+            });
+
+            // Style search input inside dropdown
+            var inputs = popover.querySelectorAll('input');
+            inputs.forEach(function(input) {
+                input.style.backgroundColor = '#1a1a2e';
+                input.style.color = '#fafafa';
+                input.style.border = '1px solid #4a5568';
+            });
+        });
+    }
+
+    // Run immediately and on mutations
+    styleDropdowns();
+    var observer = new MutationObserver(styleDropdowns);
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 """
 
 st.markdown(css_dark if dark_mode else css_light, unsafe_allow_html=True)
