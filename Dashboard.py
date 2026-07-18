@@ -69,13 +69,29 @@ css_dark = """
     .stSelectbox label, .stSlider label, .stTextInput label, .stCheckbox label {
         color: #fafafa !important;
     }
-    /* Dropdown/Popover fix */
-    div[data-baseweb="popover"], ul[data-baseweb="menu"], li[data-baseweb="menu-item"] {
+    /* Dropdown/Popover fix - OPENED dropdown menu */
+    div[data-baseweb="popover"], 
+    div[data-baseweb="popover"] > div,
+    div[data-baseweb="popover"] [role="listbox"],
+    div[data-baseweb="popover"] [role="option"],
+    ul[data-baseweb="menu"], 
+    li[data-baseweb="menu-item"] {
         background-color: #262730 !important;
         color: #fafafa !important;
     }
-    div[data-baseweb="popover"] * { color: #fafafa !important; }
-    li[data-baseweb="menu-item"]:hover { background-color: #3a3d4a !important; }
+    div[data-baseweb="popover"] * { 
+        background-color: #262730 !important; 
+        color: #fafafa !important; 
+    }
+    div[data-baseweb="popover"] [role="option"]:hover,
+    div[data-baseweb="popover"] [aria-selected="true"],
+    li[data-baseweb="menu-item"]:hover { 
+        background-color: #3a3d4a !important; 
+    }
+    /* Dropdown arrow icon */
+    div[data-baseweb="select"] svg[data-testid="icon"] { 
+        fill: #fafafa !important; 
+    }
 
     /* Selectbox input fields (closed state) */
     div[data-baseweb="select"] div, div[data-baseweb="select"] input,
@@ -99,6 +115,24 @@ css_dark = """
     div[data-testid="stCheckbox"] div[role="checkbox"] {
         border-color: #667eea !important;
     }
+
+    /* Button styling for dark mode */
+    div[data-testid="stButton"] button {
+        background-color: #667eea !important;
+        color: #ffffff !important;
+        border: 1px solid #764ba2 !important;
+    }
+    div[data-testid="stButton"] button:hover {
+        background-color: #764ba2 !important;
+        border-color: #667eea !important;
+    }
+
+    /* Refresh button specific */
+    button[kind="secondary"] {
+        background-color: #2d3748 !important;
+        color: #fafafa !important;
+        border: 1px solid #4a5568 !important;
+    }
     /* Divider */
     hr { border-color: #4a5568 !important; }
     /* Info boxes */
@@ -112,9 +146,11 @@ st.markdown(css_dark if dark_mode else css_light, unsafe_allow_html=True)
 # ======================
 # 🔄 Refresh Data
 # ======================
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
-    st.cache_data.clear()
-    st.rerun()
+refresh_col1, refresh_col2 = st.sidebar.columns([1, 1])
+with refresh_col1:
+    if st.button("🔄 Refresh Data", use_container_width=True, key="refresh_btn"):
+        st.cache_data.clear()
+        st.rerun()
 
 # ======================
 # 📂 Helper Functions
