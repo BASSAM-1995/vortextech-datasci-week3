@@ -35,9 +35,17 @@ css_light = """
 
 css_dark = """
 <style>
+    /* ✅ FIX: استهداف الحاويات الفعلية الثابتة عبر نسخ Streamlit بدل .main وحدها،
+       التي قد لا تطابق شيئًا فتبقى الخلفية بيضاء والنص أبيض (عناوين "مختفية") */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+        background-color: #0e1117;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #1a1a2e;
+    }
     .main { background-color: #0e1117; color: #fafafa; }
     .card { padding: 20px; border-radius: 10px; background-color: #262730; box-shadow: 0px 2px 6px rgba(0,0,0,0.3); }
-    h1, h2, h3, h4, h5, h6, p, label { color: #fafafa !important; }
+    h1, h2, h3, h4, h5, h6, p, label, span, div { color: #fafafa !important; }
     [data-testid="stMetric"] { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 10px; border: 1px solid #667eea; }
     [data-testid="stMetricLabel"] { color: #a0a0a0 !important; }
     [data-testid="stMetricValue"] { color: #667eea !important; font-size: 24px !important; }
@@ -653,4 +661,4 @@ if len(filtered_df) > 0:
 # Footer
 # ======================
 st.divider()
-st.caption("🚀 VortexTech | Data Dashboard | Built with ❤️")
+st.caption("🚀 VortexTech | Data Dashboard | Built with ❤️ using Streamlit + Plotly")
