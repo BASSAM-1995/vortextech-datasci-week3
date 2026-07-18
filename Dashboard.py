@@ -188,13 +188,19 @@ if exclude_zero:
 countries = ['All'] + sorted(working_df['country_code'].dropna().unique().tolist())
 selected_country = st.sidebar.selectbox("🌍 Country", countries)
 
-# Status Filter
-statuses = ['All'] + sorted(working_df['status'].dropna().unique().tolist())
-selected_status = st.sidebar.selectbox("📋 Status", statuses)
+# Status Filter (protected)
+if 'status' in working_df.columns:
+    statuses = ['All'] + sorted(working_df['status'].dropna().unique().tolist())
+    selected_status = st.sidebar.selectbox("📋 Status", statuses)
+else:
+    selected_status = 'All'  # fallback, will not filter
 
-# Funding Level Filter
-funding_levels = ['All'] + sorted(working_df['funding_level'].dropna().unique().tolist())
-selected_funding_level = st.sidebar.selectbox("💎 Funding Level", funding_levels)
+# Funding Level Filter (protected)
+if 'funding_level' in working_df.columns:
+    funding_levels = ['All'] + sorted(working_df['funding_level'].dropna().unique().tolist())
+    selected_funding_level = st.sidebar.selectbox("💎 Funding Level", funding_levels)
+else:
+    selected_funding_level = 'All'
 
 # Founded Year Range
 if 'founded_year' in working_df.columns:
@@ -258,10 +264,10 @@ if search_query and 'name' in filtered_df.columns:
 if selected_country != 'All':
     filtered_df = filtered_df[filtered_df['country_code'] == selected_country]
 
-if selected_status != 'All':
+if selected_status != 'All' and 'status' in filtered_df.columns:
     filtered_df = filtered_df[filtered_df['status'] == selected_status]
 
-if selected_funding_level != 'All':
+if selected_funding_level != 'All' and 'funding_level' in filtered_df.columns:
     filtered_df = filtered_df[filtered_df['funding_level'] == selected_funding_level]
 
 if year_range is not None and 'founded_year' in filtered_df.columns:
@@ -355,12 +361,15 @@ st.subheader("🏷️ Category Tag Cloud")
 
 if 'category_list' in filtered_df.columns:
     all_tags = get_clean_categories(filtered_df['category_list'], exclude_unknown)
-    tag_counts = all_tags.value_counts().head(15)  # Top 15 only to avoid overcrowding
+    tag_counts = all_tags.value_counts().head(15)
 
     if len(tag_counts) > 0:
         n = len(tag_counts)
         x_pos = list(range(n))
-        y_pos = [1 if i % 2 == 0 else 2 for i in range(n)]  # Staggered 2-row layout
+        y_pos = [1 if i % 2 == 0 else 2 for i in range(n)]
+
+        # Dynamic text color for readability on light/dark backgrounds
+        text_color = 'white' if dark_mode else '#1a1a2e'
 
         fig_tags = px.scatter(
             x=x_pos,
@@ -368,13 +377,13 @@ if 'category_list' in filtered_df.columns:
             size=tag_counts.values,
             text=tag_counts.index,
             color=tag_counts.values,
-            color_continuous_scale='Blues',   # harmonious with brand, no harsh yellows
+            color_continuous_scale='Blues',
             template=get_template(),
             size_max=90
         )
         fig_tags.update_traces(
             textposition='middle center',
-            textfont=dict(size=11, color='white', family='Arial Black'),
+            textfont=dict(size=11, color=text_color, family='Arial Black'),
             marker=dict(line=dict(width=1.5, color='white'), opacity=0.85)
         )
         fig_tags.update_layout(
@@ -402,15 +411,13 @@ with colC:
     funding_for_hist = filtered_df[filtered_df['funding_total_usd'] > 0]['funding_total_usd']
 
     if len(funding_for_hist) > 0:
-        # Manual log10 bins for stable display across all data ranges
-        log_vals = np.log10(funding_for_hist.replace(0, 1))  # avoid log(0)
+        log_vals = np.log10(funding_for_hist.replace(0, 1))
         fig3 = px.histogram(
             x=log_vals,
             nbins=30,
             template=get_template(),
             color_discrete_sequence=['#667eea']
         )
-        # Custom tick labels showing dollar values
         tick_vals = list(range(int(np.floor(log_vals.min())), int(np.ceil(log_vals.max())) + 1))
         fig3.update_xaxes(
             tickvals=tick_vals,
@@ -469,6 +476,8 @@ with colE:
         )
         fig5.update_layout(height=350, showlegend=False)
         st.plotly_chart(fig5, use_container_width=True)
+    else:
+        st.info("Status data not available")
 
 with colF:
     st.subheader("💎 Funding Level Distribution")
@@ -489,6 +498,8 @@ with colF:
         )
         fig6.update_layout(height=350, showlegend=False)
         st.plotly_chart(fig6, use_container_width=True)
+    else:
+        st.info("Funding level data not available")
 
 # ======================
 # 📅 Temporal Analysis
