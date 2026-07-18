@@ -35,23 +35,22 @@ css_light = """
 
 css_dark = """
 <style>
-    /* ✅ FIX: استهداف الحاويات الفعلية الثابتة عبر نسخ Streamlit بدل .main وحدها،
-       التي قد لا تطابق شيئًا فتبقى الخلفية بيضاء والنص أبيض (عناوين "مختفية") */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-        background-color: #0e1117;
-    }
-    section[data-testid="stSidebar"] {
-        background-color: #1a1a2e;
-    }
     .main { background-color: #0e1117; color: #fafafa; }
     .card { padding: 20px; border-radius: 10px; background-color: #262730; box-shadow: 0px 2px 6px rgba(0,0,0,0.3); }
-    h1, h2, h3, h4, h5, h6, p, label, span, div { color: #fafafa !important; }
+    h1, h2, h3, h4, h5, h6, p, label { color: #fafafa !important; }
     [data-testid="stMetric"] { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 10px; border: 1px solid #667eea; }
     [data-testid="stMetricLabel"] { color: #a0a0a0 !important; }
     [data-testid="stMetricValue"] { color: #667eea !important; font-size: 24px !important; }
     [data-testid="stMetricDelta"] { color: #2ecc71 !important; }
     .stDataFrame { background-color: #262730 !important; }
     .stSelectbox label, .stSlider label, .stTextInput label { color: #fafafa !important; }
+    /* Fix: Dark mode dropdown/popover styling */
+    div[data-baseweb="popover"], ul[data-baseweb="menu"], li[data-baseweb="menu-item"] {
+        background-color: #262730 !important;
+        color: #fafafa !important;
+    }
+    div[data-baseweb="popover"] * { color: #fafafa !important; }
+    li[data-baseweb="menu-item"]:hover { background-color: #3a3d4a !important; }
 </style>
 """
 
@@ -93,8 +92,6 @@ def format_currency(value):
         return f"${value:,.0f}"
 
 
-# ✅ FIX (تكرار الكود): دالة موحّدة لتنظيف وتفكيك عمود الفئات
-# تُستخدم الآن في كل من Pie Chart و Tag Cloud بدل تكرار نفس السطرين
 def get_clean_categories(series, exclude_unknown_flag=False):
     """Split pipe-separated categories, clean whitespace/empties, optionally drop 'Unknown'."""
     tags = series.dropna().str.split('|').explode()
@@ -106,7 +103,7 @@ def get_clean_categories(series, exclude_unknown_flag=False):
 
 
 # ======================
-# 📂 Load Data (PRO)
+# 📂 Load Data
 # ======================
 @st.cache_data(ttl=3600)
 def load_data():
@@ -173,7 +170,6 @@ if search_query:
 exclude_zero = st.sidebar.checkbox("❌ Exclude companies with $0 funding", value=True)
 
 # Exclude 'Unknown' categories option
-# ✅ FIX (توضيح النطاق): الرقم ديناميكي + توضيح صريح أن هذا يؤثر فقط على رسوم الفئات
 unknown_count = (df['primary_category'] == 'Unknown').sum() if 'primary_category' in df.columns else 0
 
 exclude_unknown = st.sidebar.checkbox(
@@ -324,7 +320,7 @@ with colA:
             x='Country',
             y='Count',
             color='Count',
-            color_continuous_scale='Viridis',
+            color_continuous_scale='Blues',
             template=get_template()
         )
         fig1.update_layout(height=400)
@@ -332,7 +328,7 @@ with colA:
     else:
         st.info("Country data not available")
 
-# Categories Pie — الآن يستخدم الدالة الموحّدة get_clean_categories
+# Categories Pie
 with colB:
     st.subheader("🏭 Top Categories")
 
@@ -353,7 +349,7 @@ with colB:
         st.info("Category data not available")
 
 # ======================
-# 🏷️ Tag Cloud — الآن يستخدم نفس الدالة الموحّدة
+# 🏷️ Tag Cloud
 # ======================
 st.subheader("🏷️ Category Tag Cloud")
 
@@ -372,7 +368,7 @@ if 'category_list' in filtered_df.columns:
             size=tag_counts.values,
             text=tag_counts.index,
             color=tag_counts.values,
-            color_continuous_scale='Viridis',
+            color_continuous_scale='Blues',   # harmonious with brand, no harsh yellows
             template=get_template(),
             size_max=90
         )
@@ -406,16 +402,22 @@ with colC:
     funding_for_hist = filtered_df[filtered_df['funding_total_usd'] > 0]['funding_total_usd']
 
     if len(funding_for_hist) > 0:
+        # Manual log10 bins for stable display across all data ranges
+        log_vals = np.log10(funding_for_hist.replace(0, 1))  # avoid log(0)
         fig3 = px.histogram(
-            funding_for_hist,
-            x='funding_total_usd',
-            nbins=50,
-            log_x=True,
+            x=log_vals,
+            nbins=30,
             template=get_template(),
             color_discrete_sequence=['#667eea']
         )
+        # Custom tick labels showing dollar values
+        tick_vals = list(range(int(np.floor(log_vals.min())), int(np.ceil(log_vals.max())) + 1))
+        fig3.update_xaxes(
+            tickvals=tick_vals,
+            ticktext=[f"${10**v:,.0f}" for v in tick_vals],
+            title_text="Funding (USD)"
+        )
         fig3.update_layout(
-            xaxis_title="Funding (USD, log scale)",
             yaxis_title="Number of Companies",
             height=400
         )
@@ -473,7 +475,6 @@ with colF:
     if 'funding_level' in filtered_df.columns:
         level_counts = safe_value_counts(filtered_df['funding_level'], top_n=10, name_col='Level', count_col='Count')
         level_order = {'Low': 0, 'Medium': 1, 'High': 2}
-        # ✅ الترتيب: القيم غير المعروفة (لو ظهرت مستقبلًا) تُوضع في النهاية تلقائيًا دون أي خطأ
         level_counts['_sort'] = level_counts['Level'].map(level_order)
         level_counts = level_counts.sort_values('_sort', na_position='last').drop('_sort', axis=1)
 
@@ -580,10 +581,8 @@ display_cols = [c for c in display_cols if c in filtered_df.columns]
 
 preview_df = filtered_df[display_cols].head(100).copy()
 
-# ✅ FIX (عمود All Categories): حل حقيقي يعمل فعليًا (بديل tooltip المكسور سابقًا)
 if 'category_list' in filtered_df.columns:
     preview_df['all_categories'] = filtered_df['category_list'].head(100).str.replace('|', ', ')
-    # إدراجه بعد primary_category مباشرة لو موجود، وإلا في مكان مناسب
     insert_at = display_cols.index('primary_category') + 1 if 'primary_category' in display_cols else len(display_cols)
     display_cols.insert(insert_at, 'all_categories')
     preview_df = preview_df[display_cols]
